@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxograma Interativo do Projeto de Migração</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* --- Estrutura Principal --- */
+        .flowchart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 4rem; align-items: start; }
+        .phase-box { padding: 1rem; border: 2px solid #e5e7eb; border-radius: 1rem; background-color: #f9fafb; text-align: center; }
+        .phase-connector { height: 3rem; width: 2px; background-color: #6b7280; margin: 0 auto; position: relative; }
+        .phase-connector::after { content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #6b7280; }
+        
+        #phase1 { grid-column: 1 / 3;}
+        #phase2 { min-height: 190px;}
+        
+        #col-1-wrapper { grid-column: 1 / 2; position: relative; }
+        #col-2-wrapper { grid-column: 2 / 3; }
+
+        /* --- Nós do Fluxograma --- */
+        .flow-node { border: 2px solid #9ca3af; background-color: #ffffff; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin: 0 auto; position: relative; z-index: 1; transition: all 0.2s ease-in-out; }
+        .clickable { cursor: pointer; border-color: #4f46e5; background-color: #eef2ff; }
+        .clickable:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #312e81; }
+        .node-diamond { width: 140px; height: 140px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+        .node-diamond.clickable:hover { transform: rotate(45deg) scale(1.05); }
+        .node-diamond .content { transform: rotate(-45deg); font-size: 0.875rem; line-height: 1.25rem; }
+
+        /* --- Conectores Verticais Internos --- */
+        .connector { height: 3rem; width: 2px; background-color: #6b7280; margin: 0 auto; position: relative; }
+        .connector::after { content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #6b7280; }
+        
+        #col-1-wrapper::after { content: ''; position: absolute; top: calc(50% - 1px); right: -2rem; transform: translateY(-50%); width: 2rem; height: 2px; background-color: #6b7280; }
+        #col-1-wrapper::before { content: ''; position: absolute; top: calc(50% - 1px); right: -2.25rem; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #6b7280; }
+        
+        @media (max-width: 1024px) {
+            .flowchart-grid { grid-template-columns: 1fr; }
+            #col-1-wrapper, #col-2-wrapper { grid-column: 1 / 2; }
+            #col-1-wrapper::after, #col-1-wrapper::before { display: none; }
+            #col-1-wrapper { margin-bottom: 4rem; position: relative; }
+            .phase-box-wrapper::after, .phase-box-wrapper::before {
+                content: '';
+                position: absolute;
+                bottom: -2rem;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 2rem;
+                background-color: #6b7280;
+            }
+            .phase-box-wrapper::before {
+                bottom: -2.25rem;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 10px solid #6b7280;
+            }
+        }
+
+        /* --- Painel de Detalhes (Modal) --- */
+        .details-panel-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.705); opacity: 0; transition: opacity 1.5s ease; pointer-events: none; z-index: 40; }
+        .details-panel-overlay.active { opacity: 1; pointer-events: auto; }
+        .side-panel { position: fixed; top: 0; bottom: 0; width: 100%; max-width: 450px; background-color: white; box-shadow: 0 0 25px rgba(0,0,0,0.1); transition: transform 0.3s ease; display: flex; flex-direction: column; z-index: 50; }
+        
+        #technical-panel { right: 0; transform: translateX(100%); }
+        #technical-panel.active { transform: translateX(0); }
+
+        #business-panel { left: 0; transform: translateX(-100%); }
+        #business-panel.active { transform: translateX(0); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">Fluxograma Interativo do Projeto</h1>
+        <p class="text-center text-gray-600 mb-12">Clique em qualquer caixa do fluxograma para ver mais detalhes.</p>
+        
+        <div class="space-y-8">
+            <div class="phase-box-wrapper relative">
+                <div id="phase2" class="phase-box">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 1: ADEQUAÇÕES DE SISTEMA SDOPEN</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
+                        <div class="flow-node w-64 clickable" 
+                             data-title="Adequação do Layout 707"
+                             data-business-context='<p>Para viabilizar a portabilidade de operações de Renda Fixa, é necessário que o sistema possa receber informações adicionais que não existiam no layout antigo. A inclusão desses campos é o primeiro passo para permitir que o sistema calcule impostos e registre as operações de forma correta.
+                              <br><br>
+                              <p class="mb-4">Modificação no sistema para aceitar novos campos no arquivo de importação de operações (Tipo 707). 
+                                <br><br>
+                                No Layout da Planilha de Operações Renda Fixa, disponível no menu <b>Processo → Importação de Arquivos → Tipo de Arquivo “707”</b>, devem ser acrescentados os campos abaixo:</p>
+                              <table class="w-full text-left border-collapse">
+                                  <thead class="border-b-2 border-gray-200">
+                                      <tr>
+                                          <th class="p-2 text-sm font-semibold text-gray-600">Campo</th>
+                                          <th class="p-2 text-sm font-semibold text-gray-600">Formato</th>
+                                          <th class="p-2 text-sm font-semibold text-gray-600">Obrigatório</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr class="border-b border-gray-100">
+                                          <td class="p-2 font-medium text-gray-800">Data de Aplicação</td>
+                                          <td class="p-2 text-gray-600">DD/MM/YYYY</td>
+                                          <td class="p-2 text-gray-600">Não</td>
+                                      </tr>
+                                      <tr><td colspan="3" class="p-2 pt-0 text-xs text-gray-500"><ul class="list-disc list-inside pl-2"><li>Essencial para cálculo dos impostos da operação.</li></ul></td></tr>
+                                      <tr class="border-b border-gray-100">
+                                          <td class="p-2 font-medium text-gray-800">Valor Aplicação</td>
+                                          <td class="p-2 text-gray-600">Numérico (11,9)</td>
+                                          <td class="p-2 text-gray-600">Não</td>
+                                      </tr>
+                                      <tr><td colspan="3" class="p-2 pt-0 text-xs text-gray-500"><ul class="list-disc list-inside pl-2"><li>Essencial para cálculo dos impostos da operação.</li></ul></td></tr>
+                                      <tr class="border-b border-gray-100">
+                                          <td class="p-2 font-medium text-gray-800">Mensagem</td>
+                                          <td class="p-2 text-gray-600">Alfanumérico (250)</td>
+                                          <td class="p-2 text-gray-600">Não</td>
+                                      </tr>
+                                      <tr><td colspan="3" class="p-2 pt-0 text-xs text-gray-500"><ul class="list-disc list-inside pl-2"><li>Permite importar uma mensagem de complementação da operação.</li></ul></td></tr>
+                                  </tbody>
+                              </table>
+                             </p>'
+                             data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.6.1.-Acrescentar-campos-no-Layout-de-Importa%C3%A7%C3%A3o-da-Planilha-de-Opera%C3%A7%C3%B5es"
+                             data-details='
+                                O processo do GSX realiza a chamada a procedure <b>sOpLeArqOperacoes</b> onde a própria tela faz a leitura e armazenamento em uma tabela temporária: <b>bc_importa_arquivo</b>
+                                <br><br>
+                                - Criar 3 variáveis para receber os 3 novos campos seguindo o padrão do sistema.
+                                <br>
+                                - Criar validações nos respectivos campos.
+                                <br>
+                                - Trafegar a informação para o devido procedimento:
+                                <br><br>
+                                Na chamada do procedimento de inserção de operação(boleto) <b>sOpInsere_OpOper</b> incluir os parâmetros: <b>pDtAplicacao</b> e <b>pVlrIni</b>
+                                <br><br>
+                                Pós chamada do procedimento do boleto, chamar a inclusão da mensagem caso não seja nula: <b>sOpInsereMensagemOper</b>'>
+                            Adequar Layout de Importação "707"
+                        </div>
+                        <div class="flow-node w-64 clickable" 
+                             data-title="Alterações na Tela de Aditamento"
+                             data-business-context="<p>O processo de aditamento de um papel (alteração de suas características) precisa ser flexível. A inclusão do campo de 'defasagem' na tela permite que o usuário de negócio decida, caso a caso, como o cálculo da rentabilidade deve se comportar em relação ao indexador, trazendo mais precisão para a operação.
+                                <br><br>
+                                <b>Incluir o campo Defasagem Index no Aditamento</b><br><br>
+                                Na tela de aditamento de papéis (botão Direito > Papel > botão direito > Aditamento), deverá ser incluso o campo “Defasagem Index“:
+                                Campo inteiro, não obrigatório para aditamento do papel;
+                                Quando um papel for aditado, alterando o dado presente neste campo, a partir da data do aditamento, o cálculo da valorização do ativo irá considerar o indexador da data que seja coincidente com o período de defasagem inserido.
+                                <i>Exemplo: Caso o campo “Defasagem Index” esteja configurado como 2 e estejamos no dia 24/04, o indexador a ser aplicado na valorização do ativo será o do dia 22/02.</i>
+                             </p>"
+                             data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.3.1.-Incluir-o-campo-Defasagem-Index-no-Aditamento"
+                             data-details="<p><b>Objetivo:</b> Acrescentar o campo 'Defasagem Index' na tela de aditamento (FRMADITAMENTO).</p><br><p><b>Alterações:</b>
+                                Criação de delta para insert na op_atributo_titulo com o novo item de defasagem index do papel.<br><br>
+                                <b>Nome: pOpApiAditamentoPapel</b><br><br>
+                                <b>Objetivo: </b> Esta package contém procedures para cadastro de aditamento de ativos do tipo CCB, CRA, CRI, DEB, CCIM.
+                                <br><br><b>Nome: pOpApiAditamentoPapel.insereEvento</b><br><br>
+                                <b>Objetivo: </b><br>
+                                Esta rotina é utilizada para incluir novos valores dos atributos aditáveis do ativo ou seja os novos valores do ativo que serão atualizados após efetivar o aditamento. <br><br>
+                                <b>Descrição do Processo: </b><br>
+                                A rotina de cadastro do atributo de aditamento (InsereAtributo) compreende 2 passos distintos:
+                                . validação dos parâmetros informados; em caso de inconsistências ou ausência de valores, o processo é interrompido e uma mensagem de erro retornada em 'posMsgErro'
+                                . Cadastra o novo valor do atributo de papel no envento de aditamento, para visualizar acessar a tela de aditamento do papel.
+                                Qualquer erro ocorrido no processo provocará a interrupção do mesmo e retorno com mensagem explicativa no parâmetro posMsgErro.
+                                <br><br>Para efetivação do aditamento deve executar a AlteraSituacaoEvento informando a situação 'A', ou seja, deverá chamar o processo pOpApiAditamentoPapel.alteraSituacaoEvento após atribuição.
+                                <p><br><b>Sequencia de teste possui os seguintes passos:</b></p>
+                                - cria a alteração de aditamento<br>
+                                - aprovação de evento na movimentação do dia<br>
+                                - altera a situação de aditamento - aberta<br>
+                                - deve ser refletido no cadastro do papel.
+                            </p>">
+                            <div class="content">Alterações De Aditamento</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase-connector"></div>
+
+             <div class="phase-box-wrapper relative">
+                <div id="phase1" class="phase-box">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 2: PREPARAÇÃO E DIAGNÓSTICO</h3>
+                    <div class="flex flex-col items-center">
+                        <div class="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-16">
+                            <div class="flex flex-col items-center">
+                                <br>
+                                <div class="flow-node node-diamond clickable" data-title="Script de Saúde da Base" 
+                                    data-business-context="<p>Antes de migrar, precisamos entender a 'saúde' dos dados atuais, identificando inconsistências que poderiam causar problemas futuros.</p>" 
+                                    data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.1.-Sa%C3%BAde-da-base-antes-das-altera%C3%A7%C3%B5es"
+                                    data-details="<p>Execução de um script SQL que compara a base Matera com a planilha Luz, focando em `Código de Ativo` e `Data de Emissão`.</p>"><div class="content">Script de Saúde da Base</div></div>
+                                <div class="connector"></div>
+                                <div class="flow-node w-56 clickable" data-title="Exportação de Divergências" 
+                                    data-business-context="<p>As divergências encontradas são consolidadas em um relatório para que a equipe de negócio possa analisar e tomar decisões.</p>" 
+                                    data-details="<p>O resultado do script é exportado para um arquivo CSV para fácil manipulação e análise em planilhas.
+                                        <br><br><b>OU</b><br><br> será exportado para uma tabela de staging no banco de dados, onde será possível gerar relatórios mais complexos.</p>
+                                    </p>">Exportar Divergências</div>
+                                <div class="connector"></div>
+                                <div class="flow-node clickable" data-title="Análise de Divergências" 
+                                data-business-context="<p>A equipe de negócio, que conhece as regras e os dados, revisa cada inconsistência e decide o tratamento correto para cada caso.</p>" 
+                                data-details="<p>Ação manual ou semi-automatizada baseada nos resultados extraídos para corrigir os dados na origem ou planejar o tratamento durante a migração.</p>"><div class="content">Análise de divergência (C6)</div></div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <br>
+                                <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato Inicial'" data-business-context="<p>Tiramos uma 'foto' completa do estado atual dos dados. Essa 'foto' será usada no final para garantir que a migração foi bem-sucedida.</p>" data-details="<p>Execução de scripts de `SELECT` que extraem todos os dados relevantes de tabelas como `op_papel`, `op_evento_papel`, etc. para arquivos CSV.</p>"><div class="content">Scripts de "Retrato"</div></div>
+                                <div class="connector"></div>
+                                <div class="w-full p-4 border border-dashed border-gray-300 rounded-lg mt-4">
+                                    <h4 class="text-center font-semibold text-gray-600 mb-4">Saídas (Retratos)</h4>
+                                    <div class="flex flex-wrap justify-center gap-6">
+                                        <div class="flow-node w-56 clickable" data-title="Exportação dos Retratos características do papel" 
+                                        data-business-context="<p>As 'fotos' dos dados são guardadas em arquivos separados para cada tipo de informação, facilitando a comparação no final do processo.
+                                            <br><br><b>Saúde - Retrato características do papel</b><br><br>
+                                            Trazer informação cadastral dos papéis CRI, CRA e Debêntures, cujo indexador seja igual “PU_EXTERNO“, custódia “CTP21“ e vencimento maior que a data de referência do sistema.
+                                            Campos a retornar (Botão Direito do Mouse → Papel): 
+                                            - Classificação Interna do Titulo origem do papel (Cadastro → Título → Cadastro);<br>
+                                            - Código do ativo;<br>
+                                            - Data Emissão;<br>
+                                            - Data Vencimento;<br>
+                                            - Data Início Rentabilidade;<br>
+                                            - Coupom;<br>
+                                            - Indexador;<br>
+                                            - Percentual Indexador;<br>
+                                            - Fórmula;<br>
+                                            - Código ISIN;<br>
+                                            - PU Externo (indicador).
+                                            <b><br><br>Filtros a aplicar para consulta:</b><br>
+                                            - Indexador = “PU_EXTERNO“<br>
+                                            - Clearing = “CTP21“<br>
+                                            - Dt. Vcto > “data_referência_open“<br>
+                                            - Classificação Interna do Titulo = “CRI“, ”CRA”, ”Debêntures”
+                                        </p>" 
+                                        data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.1.-Retrato-caracter%C3%ADsticas-do-papel"
+                                        data-details="<p><br>
+                                            op.tit.COD_CLASSIF_TIT_INTERNA
+                                            op_papel.cod_papel_sis_custodia
+                                            op_papel.DT_EMISSAO
+                                            decode(op_papel.ind_vcto_indeterminado, 'N', op_papel.dt_vcto, to_date(null)) dt_vcto,
+                                            op_papel.DT_BASE
+                                            op_papel.Coupom
+                                            op_papel.ID_TIPO_INDEXADOR
+                                            op_papel.pct_indexador
+                                            op_papel.ID_FORMULA
+                                            op_papel.cod_isin
+                                            op_papel.ind_pu_curva_externo.
+                                        </p>">Retrato: Características do Papel</div>
+                                        <div class="flow-node clickable w-56" data-title="Retrato: Parâmetros Juros/Amort." 
+                                            data-business-context="<p>Fotografa as regras de pagamento de juros e amortização do principal do papel.<br><br>
+                                                <b>Campos a retornar (Botão Direito do Mouse → Papel → Det. Jur./Amortz.):</b><br><br>
+                                                Código do Ativo do papel respectivo; <br>
+                                                Forma de Pagamento;<br>
+                                                Critério para Cálculo de Juros;<br>
+                                                Periodicidade de Correção;<br>
+                                                Tipo Correção;<br>
+                                                Pró Rata de Correção;<br>
+                                                Periodicidade Juros;<br>
+                                                Juros a cada;<br>
+                                                Juros A partir de;<br>
+                                                Tipo Amortização;<br>
+                                                Amortização a cada;<br>
+                                                Amortização A partir de.</p>" 
+                                            data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.2.-Retrato-Par%C3%A2metros-Juros-e-Amortiza%C3%A7%C3%A3o"
+                                            data-details="<p>
+                                                op_papel.cod_papel_sis_custodia<br>
+                                                select id_forma_pagamento
+                                                from   vop_cmb_forma_pagamento
+                                                into   :dlgPAPELDet.nIdFormaPagamento
+                                                where  descricao = :dlgPAPELDet.cmbFormaPagamento and
+                                                       cod_tit = :dlgPAPELDet.psCodTit;<br>
+                                                select descricao
+                                                from   op_calculo_juros
+                                                into :dlgPAPELDet.cmbCalculoJuros
+                                                where  id_calculo_juros = :dlgPAPELDet.nIdCalculoJuros;<br>
+                                                select descricao
+                                                from   vop_cmb_periodicidade_correcao
+                                                into :dlgPAPELDet.cmbPeriodicidadeCorrecao
+                                                where  id_periodicidade_correcao = :dlgPAPELDet.sIdPeriodicidadeCorrecao  and
+                                                       id_tipo_indexador = :psIdTipoIndexador;<br>
+                                                op_papel.id_tipo_correcao;<br>
+                                                op_papel.id_pro_rata_correcao;<br>
+                                                op_papel.id_periodicidade_juros;<br>
+                                                op_papel.FREQUENCIA_JUROS;<br>
+                                                op_papel.dt_ini_fluxo_juros;<br>
+                                                op_papel.id_tipo_amortizacao;<br>
+                                                op_papel.frequencia_amortizacao;<br>
+                                                op_papel.dt_ini_fluxo_amortizacao;<br>
+                                            </p>">Retrato: Parâmetros Juros/Amort.</div>
+                                        <div class="flow-node clickable w-56" data-title="Retrato: Fluxos de Juros" 
+                                            data-business-context="<p>Gera um registro de todas as parcelas de juros futuras e passadas (não pagas) do papel. <br><br>
+                                                <b>Campos a retornar (Botão Direito do Mouse → Papel → Fluxo Juros):</b><br><br>
+                                                Código ativo;<br>
+                                                Parcela;<br>
+                                                Data Pgto*;<br>
+                                                Data de Pgto Efetiva;<br>
+                                                Prazo;<br>
+                                                Pu Juros;<br>
+                                                Parcela vencida e não paga?;<br>
+                                                Situação;<br>
+                                            </p>" 
+                                            data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.2.-Retrato-Par%C3%A2metros-Juros-e-Amortiza%C3%A7%C3%A3o"
+                                            data-details="<p>op_papel.cod_papel_sis_custodia<br>
+                                                op_fluxo_pgto_juros.num_parcela<br>
+                                                op_fluxo_pgto_juros.dt_pgto,<br>
+                                                op_fluxo_pgto_juros.dt_pgto_efetiva,<br>
+                                                op_fluxo_pgto_juros.pu_juros,<br>
+                                                op_fluxo_pgto_juros.prazo,<br>
+                                                op_fluxo_pgto_juros.ind_parcela_vencida_nao_paga,<br>
+                                                op_fluxo_pgto_juros.id_sit_parcela
+                                            </p>">Retrato: Fluxos de Juros</div>
+                                        <div class="flow-node clickable w-56" data-title="Retrato: Fluxos de Amortização" 
+                                            data-business-context="<p>Gera um registro de todas as parcelas de amortização do principal, tanto futuras quanto vencidas.
+                                                <br><br>
+                                                <b>Campos a retornar (Botão Direito do Mouse → Papel → Fluxo Amort.):</b><br><br>
+                                                Código ativo;<br>
+                                                Parcela;<br>
+                                                Data Pgto*;<br>
+                                                Data Efetiva;<br>
+                                                % Principal;<br>
+                                                % Juros;<br>
+                                                Parcela vencida e não paga?;<br>
+                                                PU Amortização;<br>
+                                                Situação.
+                                            </p>" 
+                                            data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.4.-Retrato-fluxos-de-amortiza%C3%A7%C3%A3o-do-papel"
+                                            data-details="<p>
+                                                vop_fluxo_pgto_amortizacao (view da grid da tela)<br><br>
+                                                fpa.id_papel,<br>
+                                                fpa.num_parcela,<br>
+                                                fpa.dt_pgto,<br>
+                                                fpa.dt_efetiva,<br>
+                                                fpa.pct_amortizacao_principal,<br>
+                                                fpa.pct_amortizacao_juros,<br>
+                                                fpa.pu_amortizacao,<br>
+                                                fpa.ind_parcela_vencida_nao_paga,<br>
+                                                fpa.id_sit_parcela id_sit_parcela_fluxo_pgto
+                                            </p>">Retrato: Fluxos de Amortização</div>
+                                        <div class="flow-node clickable w-56" data-title="Retrato: Boletos Associados" 
+                                            data-business-context="<p>Captura todos os boletos em aberto associados ao papel, que representam operações de venda ou transferência.
+                                                <br><br>
+                                                <b>Campos a retornar (Operação → Boleto):</b><br><br>
+                                                Num do boleto;<br>
+                                                Num do papel;<br>
+                                                Código ativo;<br>
+                                                Código do Tipo de Operação;<br>
+                                                Descrição do Tipo de Operação<br>
+                                                Data Início;<br>
+                                                Data vcto;<br>
+                                                Valor;<br>
+                                                Indexador;<br>
+                                                Percentual Indexador;<br>
+                                                Taxa;<br>
+                                                Fórmula;<br>
+                                                Quantidade;<br>
+                                                Curva Papel (indicador);<br>
+                                                Curva Operação (indicador);<br>
+                                                Vlr (Lastro);<br>
+                                                PU Atual (Lastro);<br>
+                                                PU Inicial da Operação.<br><br>
+                                                <b>Filtros a aplicar:</b><br>
+                                                Tipo de Operação = VENDA DEFINITIVA ou TRANSFERENCIA DE CUSTODIA (Papel -> Operação -> Tipo de Operação -> Operação Interna)<br>
+                                                Situação do boleto = “ABERTA“.
+                                            </p>" 
+                                            data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.5.-Retrato-boletos-associados-ao-papel"
+                                            data-details="<p><b>Consulta às tabelas de boletos e operações para retornar informações de boletos com situação 'ABERTA'.</b><br><br>
+                                                VOP_BOLETO (view base da tela)<br><br>
+                                                op_oper.id_oper<br>
+                                                op_oper.id_papel_emissao<br>
+                                                op_papel.cod_papel_sis_custodia<br>
+                                                op_oper.cod_tipo_oper<br>
+                                                op_tipo_oper.descricao<br>
+                                                op_oper.dt_ini<br>
+                                                op_oper.dt_vcto<br>
+                                                op_oper.vlr<br>
+                                                op_oper.id_tipo_indexador<br>
+                                                op_oper.pct_indexador<br>
+                                                op_oper.taxa<br>
+                                                op_oper.id_formula<br>
+                                                op_lastro.qtd??<br>
+                                                op_oper.Curva_Papel<br>
+                                                curva operação???<br>
+                                                op_lastro.vlr<br>
+                                                op_lastro.pu<br>
+                                                pu inicial???
+                                            </p>">Retrato: Boletos Associados</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase-connector"></div>
+            <div class="flowchart-grid">
+                <div id="col-1-wrapper">
+                    <div id="phase3" class="phase-box h-full">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 3: EXECUÇÃO</h3>
+                        <br>
+                        <div class="flex flex-col items-center">
+                            <div class="flow-node node-diamond clickable" data-title="Importar Planilhas da 'Luz'" 
+                                data-business-context="<p>Os dados corretos e atualizados, fornecidos pela equipe de negócio, são carregados no sistema. Esta passa a ser a 'fonte da verdade' para a migração.
+                                    <br><br>Buscar na base Matera, todos papéis em que o indexador é “PU_EXTERNO“, custódia “CTP21“ e vencimento maior que a data de referência do sistema. Utilizar o campo Código do Ativo igual ao campo codigo_sna das Planilhas da Luz, para realizar as alterações conforme mapeamentos De -> Para.
+                                </p>" 
+                                data-details="<p>Processo de ETL que carrega as planilhas (CSV) para tabelas de staging no banco de dados para serem consumidas pelos scripts subsequentes.</p>"><div class="content">Importar Planilhas da "Luz"</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node clickable" data-title="Portabilidade de Saída/Transferência de Custódia" 
+                                data-business-context="<p>Os boletos antigos, com as condições de remuneração desatualizadas, são 'desligados' para dar lugar aos novos.<br>
+                                    <br>Deve ser disponibilizado um script que efetue a Portabilidade de Saída dos boletos associados aos papéis que serão aditados, conforme critérios abaixo:<br><br>
+                                    - Boletos retornados pela consulta conforme o item script de retrato;<br>
+                                    - O script deverá vincular aos boletos um evento do tipo “TRANSFERENCIA DE CUSTODIA”;<br>
+                                    - O evento de Transferência deverá ser aprovado automaticamente independente da configuração do sistema para este tipo de evento.<br>
+                                    - A quantidade a transferir, deve ser a quantidade total vigente no boleto;<br>
+                                    - O Destinatário da Transferência será “C6 Consignado”, deverá estar cadastrado devidamente para realizar a operação.<br><br>
+                                    <b>Informativo:</b><br>
+                                    A Transferência de Custódia é realizada através do menu (Botão Direito do Mouse → Posição do Cliente → Botão Transf. Cust):
+                                </p>" 
+                                data-details="<p>Um script busca os boletos a serem portabilizados (todos os boletos associados aos papeis ADITADOS) e realizar a transferencia de custódia.
+                                            <br><br><b>O script deve:</b><br><br>
+                                            - Vincular os boletos a um evento de 'Transferência de Custódia'. Para isso via tela é chamado a procedure sOpInsereEventoTRT informando os dados de custódia atual e novo. Pode ser usado o mesmo princípio.<br><br>
+                                            - Aprovar automaticamente o evento, independente da configuração do sistema. Realizar a chamada da função de aprovação de evento da pOpAprovacao.Evento informando o evento criado no passo anterior.<br><br>
+                                            - Destinatário da transferência será 'C6 Consignado', que deverá estar devidamente cadastrado para realizar a operação.</p>
+                                </p>"><div class="content">Portabilidade de Saída/Transferência de Custódia</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node clickable" data-title="Aditamento de Papéis" 
+                                data-business-context="<p>Esta é a etapa central, onde as regras de negócio dos ativos financeiros são efetivamente alteradas para as novas condições.</p>" 
+                                data-details="<p>Execução do script principal que lê os dados da planilha 'Luz', busca os papéis correspondentes e aplica as atualizações usando a funcionalidade de Aditamento.
+                                    <br><br><b>Nome: pOpApiAditamentoPapel.insereEvento</b><br><br>
+                                    <b>Objetivo: </b><br>
+                                    Esta rotina é utilizada para incluir novos valores dos atributos aditáveis do ativo ou seja os novos valores do ativo que serão atualizados após efetivar o aditamento. <br><br>
+                                    <b>Descrição do Processo: </b><br>
+                                    A rotina de cadastro do atributo de aditamento (InsereAtributo) compreende 2 passos distintos:
+                                    . validação dos parâmetros informados; em caso de inconsistências ou ausência de valores, o processo é interrompido e uma mensagem de erro retornada em 'posMsgErro'
+                                    . Cadastra o novo valor do atributo de papel no envento de aditamento, para visualizar acessar a tela de aditamento do papel.
+                                    Qualquer erro ocorrido no processo provocará a interrupção do mesmo e retorno com mensagem explicativa no parâmetro posMsgErro.
+                                    <br><br>Para efetivação do aditamento deve executar a AlteraSituacaoEvento informando a situação 'A', ou seja, deverá chamar o processo pOpApiAditamentoPapel.alteraSituacaoEvento após atribuição.
+                                    <p><br><b>Sequencia de teste possui os seguintes passos:</b></p>
+                                    - cria a alteração de aditamento<br>
+                                    - aprovação de evento na movimentação do dia<br>
+                                    - altera a situação de aditamento - aberta<br>
+                                    - deve ser refletido no cadastro do papel.
+                                </p>"><div class="content">Aditamento de Papéis</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-64 clickable" data-title="Geração de 'Logs'" 
+                                data-business-context="<p>Para garantir a rastreabilidade e facilitar a auditoria, todas as alterações feitas pelo script são registradas.</p>" 
+                                data-details="<p>Em todas as etapas dos processos, deverá ser crados tabelas auxiliares de controle de execução de cada etapa, sendo gravados horários e dados de cada processo.<br>
+                                    Poderá posteriormente gerar um arquivo de log detalhado, registrando o 'antes' e o 'depois' de cada campo alterado para cada ativo. Ou simplesmente garantir esse controle em tabelas consultáveis para administração dos dados.</p>">Gerar Logs Detalhados</div>
+                            <div class="connector"></div>
+                            <div class="flow-node clickable" data-title="Portabilidade de Entrada" 
+                                data-business-context="<p>Com os papéis já atualizados, criamos os novos boletos que refletem as condições corretas que foram vendidas ao cliente.</p>" 
+                                data-details="<p>Esta etapa é a chamada do procedimento realizado na fase 1: Adequar Layout de Importação '707'.<br>
+                                <b>Ação realizada pelo próprio C6.</b></p>"><div class="content">Portabilidade de Entrada</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-64 clickable" data-title="Criação de Novos Boletos" 
+                                data-business-context="<p>O resultado final desta fase é que o cliente agora visualiza em sua posição os novos boletos, com as taxas e condições corretas.</p>" 
+                                data-details="<p>Novos registros são inseridos na tabela de boletos, associados aos papéis que foram aditados.</p>">Criação de novos boletos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="col-2-wrapper">
+                    <div id="phase4" class="phase-box h-full">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 4: VALIDAÇÃO FINAL</h3>
+                        <div class="flex flex-col items-center">
+                            <div class="flow-node node-diamond clickable" data-title="Conferência da Valorização" 
+                                data-business-context="<p>É a prova de que o sistema está calculando a rentabilidade dos ativos corretamente de acordo com as novas regras.</p>" 
+                                data-details="<p>Após a 'virada de dia', a equipe de validação consulta as telas de estoque e confere se os valores de PU Curva e PU Contábil batem com cálculos de referência.</p>"><div class="content">Conferência da Valorização</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-64 clickable" data-title="Aguardar 'Virada de Dia'" 
+                                data-business-context="<p>Os cálculos de rentabilidade e valorização dos ativos são processos pesados, geralmente executados durante a noite.</p>" 
+                                data-details="<p>É preciso esperar a conclusão do processamento batch noturno para que os novos dados sejam refletidos nos cálculos de PU.</p>">Aguardar 'virada de dia'</div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-64 clickable" data-title="Validação dos Cálculos" 
+                                data-business-context="<p>A equipe confere manualmente ou com scripts de apoio se os valores apresentados pelo sistema estão corretos.</p>" 
+                                data-details="<p>Consultas SQL ou verificação em telas específicas para comparar o PU (Preço Unitário) calculado pelo sistema com um valor de referência.</p>">Consultar Estoque e validar PU</div>
+                            <div class="connector"></div>
+                            <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato Final'" 
+                                data-business-context="<p>Tiramos uma segunda 'foto' dos dados, agora no estado final após todas as alterações, para comparar com a 'foto' inicial.</p>" 
+                                data-details="<p>Os mesmos scripts da Fase 1 são reexecutados para gerar um novo conjunto de arquivos CSV que representam o estado final da base.</p>"><div class="content">Scripts de "Retrato Final"</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-64 clickable" data-title="Reexecução dos Scripts" 
+                                data-business-context="<p>A automação da captura do estado final garante que a comparação com o estado inicial seja precisa e consistente.</p>" 
+                                data-details="<p>Os scripts de `SELECT` da Fase 1 são executados novamente, com os mesmos filtros, para gerar os CSVs do estado final.</p>">Reexecutar scripts de retrato</div>
+                            <div class="connector"></div>
+                            <div class="flow-node node-diamond clickable" data-title="Comparativo de Validação" 
+                                data-business-context="<p>Esta é a validação final e mais importante, onde garantimos que a 'cirurgia' nos dados foi um sucesso e sem efeitos colaterais.</p>" 
+                                data-details="<p>Ferramentas de 'diff' (como `git diff` ou `WinMerge`) ou scripts Python/Shell são usados para comparar os CSVs do Retrato Inicial com os do Retrato Final. O objetivo é garantir que apenas as alterações esperadas ocorreram.</p>"><div class="content">Comparar "Inicial" vs "Final"</div></div>
+                            <div class="connector"></div>
+                            <div class="flow-node w-56 clickable" data-title="Fim do Processo" 
+                                data-business-context="<p>O projeto é formalmente encerrado, com a migração validada e concluída com sucesso.</p>" 
+                                data-details="<p>A documentação final é arquivada, o código é movido para o controle de versão final e as equipes são comunicadas do encerramento.</p>">Fim do Processo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Painel de Overlay -->
+    <div id="details-panel-overlay" class="details-panel-overlay"></div>
+
+    <!-- Painel Esquerdo: Contexto de Negócio -->
+    <div id="business-panel" class="side-panel">
+        <div class="p-5 border-b flex justify-between items-center bg-blue-50">
+            <h2 id="business-panel-title" class="text-lg font-semibold text-blue-900">Contexto de Negócio</h2>
+            <button class="close-panel-btn text-blue-500 hover:text-blue-800">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div id="business-panel-content" class="p-6 overflow-y-auto flex-grow prose"></div>
+        <div id="business-panel-footer" class="p-4 border-t border-gray-200 bg-gray-50 hidden">
+            <a id="business-reference-link" href="#" target="_blank" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                Ver documento de referência
+            </a>
+        </div>
+    </div>
+    
+    <!-- Painel Direito: Solução Técnica -->
+    <div id="technical-panel" class="side-panel">
+        <div class="p-5 border-b flex justify-between items-center bg-purple-50">
+            <h2 id="technical-panel-title" class="text-lg font-semibold text-purple-900">Solução Técnica</h2>
+            <button class="close-panel-btn text-purple-500 hover:text-purple-800">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div id="technical-panel-content" class="p-6 overflow-y-auto flex-grow prose"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const clickableNodes = document.querySelectorAll('.clickable');
+            const overlay = document.getElementById('details-panel-overlay');
+            const closeButtons = document.querySelectorAll('.close-panel-btn');
+
+            // Painel Esquerdo (Business)
+            const businessPanel = document.getElementById('business-panel');
+            const businessPanelTitle = document.getElementById('business-panel-title');
+            const businessPanelContent = document.getElementById('business-panel-content');
+            const businessPanelFooter = document.getElementById('business-panel-footer');
+            const businessRefLinkElement = document.getElementById('business-reference-link');
+
+            // Painel Direito (Technical)
+            const technicalPanel = document.getElementById('technical-panel');
+            const technicalPanelTitle = document.getElementById('technical-panel-title');
+            const technicalPanelContent = document.getElementById('technical-panel-content');
+            
+            function openPanels(node) {
+                const nodeTitle = node.getAttribute('data-title');
+                const businessDetails = node.getAttribute('data-business-context');
+                const technicalDetails = node.getAttribute('data-details');
+                const refLink = node.getAttribute('data-reference-link');
+
+                let panelOpened = false;
+
+                if (businessDetails) {
+                    // businessPanelTitle.innerText = nodeTitle; // Removido para manter o título estático
+                    businessPanelContent.innerHTML = `<h3 class="text-md font-bold mb-4 text-gray-800">${nodeTitle}</h3>` + businessDetails;
+
+                    if (refLink) {
+                        businessRefLinkElement.href = refLink;
+                        businessPanelFooter.classList.remove('hidden');
+                    } else {
+                        businessPanelFooter.classList.add('hidden');
+                    }
+                    businessPanel.classList.add('active');
+                    panelOpened = true;
+                }
+
+                if (technicalDetails) {
+                    // technicalPanelTitle.innerText = nodeTitle; // Removido para manter o título estático
+                    technicalPanelContent.innerHTML = `<h3 class="text-md font-bold mb-4 text-gray-800">${nodeTitle}</h3>` + technicalDetails;
+                    technicalPanel.classList.add('active');
+                    panelOpened = true;
+                }
+                
+                if (panelOpened) {
+                    overlay.classList.add('active');
+                }
+            }
+
+            function closePanels() {
+                overlay.classList.remove('active');
+                businessPanel.classList.remove('active');
+                technicalPanel.classList.remove('active');
+            }
+
+            clickableNodes.forEach(node => {
+                node.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openPanels(node);
+                });
+            });
+
+            closeButtons.forEach(btn => btn.addEventListener('click', closePanels));
+            overlay.addEventListener('click', closePanels);
+        });
+    </script>
+</body>
+</html>
