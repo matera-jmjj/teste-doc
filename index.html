@@ -178,12 +178,16 @@
                                 <div class="flow-node node-diamond clickable" data-title="Script de Saúde da Base" 
                                     data-business-context="<p>Antes de migrar, precisamos entender a 'saúde' dos dados atuais, identificando inconsistências que poderiam causar problemas futuros.</p>" 
                                     data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.1.-Sa%C3%BAde-da-base-antes-das-altera%C3%A7%C3%B5es"
-                                    data-details="<p>Execução de um script SQL que compara a base Matera com a planilha Luz, focando em `Código de Ativo` e `Data de Emissão`.</p>"><div class="content">Script de Saúde da Base</div></div>
+                                    data-details="<p>Leitura de dados disponibilizados pelo C6, cujo irão informar os respectivos campos para nossa comparação com o que tem cadastrado nas tabelas do open.<br><br>
+                                        <b>=> op_papel.cod_papel_sis_custodia<br>
+                                        => op_papel.DT_EMISSAO</b><br><br>
+                                        Apresentar as divergências encontradas entre os dados do C6 e os dados do Open, para que a equipe de negócio possa analisar e decidir o tratamento adequado.
+                                    </p>"><div class="content">Script de Saúde da Base</div></div>
                                 <div class="connector"></div>
                                 <div class="flow-node w-56 clickable" data-title="Exportação de Divergências" 
                                     data-business-context="<p>As divergências encontradas são consolidadas em um relatório para que a equipe de negócio possa analisar e tomar decisões.</p>" 
                                     data-details="<p>O resultado do script é exportado para um arquivo CSV para fácil manipulação e análise em planilhas.
-                                        <br><br><b>OU</b><br><br> será exportado para uma tabela de staging no banco de dados, onde será possível gerar relatórios mais complexos.</p>
+                                        <br><br><b>OU</b><br><br> será exportado para uma tabela de staging no banco de dados, onde será possível quem tem acesso as consultas realizar a exportação via CSV.</p>
                                     </p>">Exportar Divergências</div>
                                 <div class="connector"></div>
                                 <div class="flow-node clickable" data-title="Análise de Divergências" 
@@ -192,7 +196,9 @@
                             </div>
                             <div class="flex flex-col items-center">
                                 <br>
-                                <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato Inicial'" data-business-context="<p>Tiramos uma 'foto' completa do estado atual dos dados. Essa 'foto' será usada no final para garantir que a migração foi bem-sucedida.</p>" data-details="<p>Execução de scripts de `SELECT` que extraem todos os dados relevantes de tabelas como `op_papel`, `op_evento_papel`, etc. para arquivos CSV.</p>"><div class="content">Scripts de "Retrato"</div></div>
+                                <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato Inicial'" 
+                                data-business-context="<p>Deverão ser criados scripts responsáveis por gerar um “retrato” das informações da base antes das alterações previstas nos scripts. Este retrato poderá ser utilizado para comparar as informação com o retrato pós alterações. </p>" 
+                                ><div class="content">Scripts de "Retrato"</div></div>
                                 <div class="connector"></div>
                                 <div class="w-full p-4 border border-dashed border-gray-300 rounded-lg mt-4">
                                     <h4 class="text-center font-semibold text-gray-600 mb-4">Saídas (Retratos)</h4>
@@ -250,21 +256,21 @@
                                                 Amortização A partir de.</p>" 
                                             data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.2.-Retrato-Par%C3%A2metros-Juros-e-Amortiza%C3%A7%C3%A3o"
                                             data-details="<p>
-                                                op_papel.cod_papel_sis_custodia<br>
+                                                op_papel.cod_papel_sis_custodia<br><br>
                                                 select id_forma_pagamento
                                                 from   vop_cmb_forma_pagamento
                                                 into   :dlgPAPELDet.nIdFormaPagamento
                                                 where  descricao = :dlgPAPELDet.cmbFormaPagamento and
-                                                       cod_tit = :dlgPAPELDet.psCodTit;<br>
+                                                       cod_tit = :dlgPAPELDet.psCodTit;<br><br>
                                                 select descricao
                                                 from   op_calculo_juros
                                                 into :dlgPAPELDet.cmbCalculoJuros
-                                                where  id_calculo_juros = :dlgPAPELDet.nIdCalculoJuros;<br>
+                                                where  id_calculo_juros = :dlgPAPELDet.nIdCalculoJuros;<br><br>
                                                 select descricao
                                                 from   vop_cmb_periodicidade_correcao
                                                 into :dlgPAPELDet.cmbPeriodicidadeCorrecao
                                                 where  id_periodicidade_correcao = :dlgPAPELDet.sIdPeriodicidadeCorrecao  and
-                                                       id_tipo_indexador = :psIdTipoIndexador;<br>
+                                                       id_tipo_indexador = :psIdTipoIndexador;<br><br>
                                                 op_papel.id_tipo_correcao;<br>
                                                 op_papel.id_pro_rata_correcao;<br>
                                                 op_papel.id_periodicidade_juros;<br>
@@ -391,7 +397,13 @@
                             data-business-context="<p>Os dados corretos e atualizados, fornecidos pela equipe de negócio, são carregados no sistema. Esta passa a ser a 'fonte da verdade' para a migração.
                                 <br><br>Buscar na base Matera, todos papéis em que o indexador é “PU_EXTERNO“, custódia “CTP21“ e vencimento maior que a data de referência do sistema. Utilizar o campo Código do Ativo igual ao campo codigo_sna das Planilhas da Luz, para realizar as alterações conforme mapeamentos De -> Para.
                             </p>" 
-                            data-details="<p>Processo de ETL que carrega as planilhas (CSV) para tabelas de staging no banco de dados para serem consumidas pelos scripts subsequentes.</p>"><div class="content">Importar Planilhas da "Luz"</div></div>
+                            data-details="<p>Leitura do arquivo CSV disponibilizado pelo C6, que contém as informações que serão atualizadas para tabelas de staging no banco de dados para serem consumidas pelos scripts subsequentes.<br><br>
+                            Criação de novo processo de importação de arquivo, tomar como base a alteração do layout '707'. Deverá ser criado um novo procedimento que realiza a leitura do layout disponibilizado.<br><br>
+                            => Planilha de exemplo com dados dos ativos:<br>
+                            https://docs.google.com/spreadsheets/d/1TWhko2k6TRxWV5u1P2ZMenhKi1PFSxPy/edit?gid=1075738696#gid=1075738696<br><br>
+                            => Planilha de exemplo com dados do fluxo:<br>
+                            https://docs.google.com/spreadsheets/d/1cjptLBZaPYEbbQD7l8z729n16FmTHiNH/edit?gid=667184986#gid=667184986
+                        </p>"><div class="content">Importar Planilhas da "Luz"</div></div>
                         <div class="connector"></div>
                         <div class="flow-node clickable" data-title="Portabilidade de Saída/Transferência de Custódia" 
                             data-business-context="<p>Os boletos antigos, com as condições de remuneração desatualizadas, são 'desligados' para dar lugar aos novos.<br>
@@ -435,12 +447,12 @@
                     <div class="flex flex-col items-center">
                         <div class="flow-node w-64 clickable" data-title="Geração de 'Logs'" 
                             data-business-context="<p>Para garantir a rastreabilidade e facilitar a auditoria, todas as alterações feitas pelo script são registradas.</p>" 
-                            data-details="<p>Em todas as etapas dos processos, deverá ser crados tabelas auxiliares de controle de execução de cada etapa, sendo gravados horários e dados de cada processo.<br>
+                            data-details="<p>Em todas as etapas dos processos, deverá ser criados tabelas auxiliares de controle de execução de cada etapa, sendo gravados horários e dados de cada processo.<br>
                                 Poderá posteriormente gerar um arquivo de log detalhado, registrando o 'antes' e o 'depois' de cada campo alterado para cada ativo. Ou simplesmente garantir esse controle em tabelas consultáveis para administração dos dados.</p>">Gerar Logs Detalhados</div>
                         <div class="connector"></div>
                         <div class="flow-node clickable" data-title="Portabilidade de Entrada" 
                             data-business-context="<p>Com os papéis já atualizados, criamos os novos boletos que refletem as condições corretas que foram vendidas ao cliente.</p>" 
-                            data-details="<p>Esta etapa é a chamada do procedimento realizado na fase 1: Adequar Layout de Importação '707'.<br>
+                            data-details="<p>Esta etapa é a chamada do procedimento realizado na fase 1: Adequar Layout de Importação '707'.<br><br>
                             <b>Ação realizada pelo próprio C6.</b></p>"><div class="content">Portabilidade de Entrada</div></div>
                         <div class="connector"></div>
                         <div class="flow-node w-64 clickable" data-title="Conferência da criação de Novos Boletos" 
