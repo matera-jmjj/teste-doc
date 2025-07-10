@@ -13,55 +13,48 @@
         }
 
         /* --- Estrutura Principal --- */
-        .flowchart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 4rem; align-items: start; }
         .phase-box { padding: 1rem; border: 2px solid #e5e7eb; border-radius: 1rem; background-color: #f9fafb; text-align: center; }
         .phase-connector { height: 3rem; width: 2px; background-color: #6b7280; margin: 0 auto; position: relative; }
         .phase-connector::after { content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #6b7280; }
         
-        #phase1 { grid-column: 1 / 3;}
+        #phase1 { min-height: 560px; }
         #phase2 { min-height: 190px;}
         
-        #col-1-wrapper { grid-column: 1 / 2; position: relative; }
-        #col-2-wrapper { grid-column: 2 / 3; }
-
         /* --- Nós do Fluxograma --- */
-        .flow-node { border: 2px solid #9ca3af; background-color: #ffffff; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin: 0 auto; position: relative; z-index: 1; transition: all 0.2s ease-in-out; }
+        .flow-node { border: 2px solid #9ca3af; background-color: #ffffff; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin: 0 auto; position: relative; z-index: 1; transition: all 0.2s ease-in-out; flex-shrink: 0; }
         .clickable { cursor: pointer; border-color: #4f46e5; background-color: #eef2ff; }
         .clickable:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #312e81; }
         .node-diamond { width: 140px; height: 140px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
         .node-diamond.clickable:hover { transform: rotate(45deg) scale(1.05); }
         .node-diamond .content { transform: rotate(-45deg); font-size: 0.875rem; line-height: 1.25rem; }
 
-        /* --- Conectores Verticais Internos --- */
+        /* --- Conectores Verticais --- */
         .connector { height: 3rem; width: 2px; background-color: #6b7280; margin: 0 auto; position: relative; }
         .connector::after { content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #6b7280; }
         
-        #col-1-wrapper::after { content: ''; position: absolute; top: calc(50% - 1px); right: -2rem; transform: translateY(-50%); width: 2rem; height: 2px; background-color: #6b7280; }
-        #col-1-wrapper::before { content: ''; position: absolute; top: calc(50% - 1px); right: -2.25rem; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #6b7280; }
-        
-        @media (max-width: 1024px) {
-            .flowchart-grid { grid-template-columns: 1fr; }
-            #col-1-wrapper, #col-2-wrapper { grid-column: 1 / 2; }
-            #col-1-wrapper::after, #col-1-wrapper::before { display: none; }
-            #col-1-wrapper { margin-bottom: 4rem; position: relative; }
-            .phase-box-wrapper::after, .phase-box-wrapper::before {
-                content: '';
-                position: absolute;
-                bottom: -2rem;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 2px;
-                height: 2rem;
-                background-color: #6b7280;
-            }
-            .phase-box-wrapper::before {
-                bottom: -2.25rem;
-                border-left: 6px solid transparent;
-                border-right: 6px solid transparent;
-                border-top: 10px solid #6b7280;
-            }
+        /* --- NOVO: Conector Lateral para FASE 3 --- */
+        #node3-to-4-connector::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 8rem; /* Largura da seta, ajustável com o gap */
+            height: 2px;
+            background-color: #6b7280;
         }
-
+        #node3-to-4-connector::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -8rem; /* Posição da ponta da seta */
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid #6b7280;
+        }
+        
         /* --- Painel de Detalhes (Modal) --- */
         .details-panel-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.705); opacity: 0; transition: opacity 1.5s ease; pointer-events: none; z-index: 40; }
         .details-panel-overlay.active { opacity: 1; pointer-events: auto; }
@@ -387,105 +380,73 @@
             </div>
 
             <div class="phase-connector"></div>
-            <div class="flowchart-grid">
-                <div id="col-1-wrapper">
-                    <div id="phase3" class="phase-box h-full">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 3: EXECUÇÃO</h3>
-                        <br>
-                        <div class="flex flex-col items-center">
-                            <div class="flow-node node-diamond clickable" data-title="Importar Planilhas da 'Luz'" 
-                                data-business-context="<p>Os dados corretos e atualizados, fornecidos pela equipe de negócio, são carregados no sistema. Esta passa a ser a 'fonte da verdade' para a migração.
-                                    <br><br>Buscar na base Matera, todos papéis em que o indexador é “PU_EXTERNO“, custódia “CTP21“ e vencimento maior que a data de referência do sistema. Utilizar o campo Código do Ativo igual ao campo codigo_sna das Planilhas da Luz, para realizar as alterações conforme mapeamentos De -> Para.
-                                </p>" 
-                                data-details="<p>Processo de ETL que carrega as planilhas (CSV) para tabelas de staging no banco de dados para serem consumidas pelos scripts subsequentes.</p>"><div class="content">Importar Planilhas da "Luz"</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node clickable" data-title="Portabilidade de Saída/Transferência de Custódia" 
-                                data-business-context="<p>Os boletos antigos, com as condições de remuneração desatualizadas, são 'desligados' para dar lugar aos novos.<br>
-                                    <br>Deve ser disponibilizado um script que efetue a Portabilidade de Saída dos boletos associados aos papéis que serão aditados, conforme critérios abaixo:<br><br>
-                                    - Boletos retornados pela consulta conforme o item script de retrato;<br>
-                                    - O script deverá vincular aos boletos um evento do tipo “TRANSFERENCIA DE CUSTODIA”;<br>
-                                    - O evento de Transferência deverá ser aprovado automaticamente independente da configuração do sistema para este tipo de evento.<br>
-                                    - A quantidade a transferir, deve ser a quantidade total vigente no boleto;<br>
-                                    - O Destinatário da Transferência será “C6 Consignado”, deverá estar cadastrado devidamente para realizar a operação.<br><br>
-                                    <b>Informativo:</b><br>
-                                    A Transferência de Custódia é realizada através do menu (Botão Direito do Mouse → Posição do Cliente → Botão Transf. Cust):
-                                </p>" 
-                                data-details="<p>Um script busca os boletos a serem portabilizados (todos os boletos associados aos papeis ADITADOS) e realizar a transferencia de custódia.
-                                            <br><br><b>O script deve:</b><br><br>
-                                            - Vincular os boletos a um evento de 'Transferência de Custódia'. Para isso via tela é chamado a procedure sOpInsereEventoTRT informando os dados de custódia atual e novo. Pode ser usado o mesmo princípio.<br><br>
-                                            - Aprovar automaticamente o evento, independente da configuração do sistema. Realizar a chamada da função de aprovação de evento da pOpAprovacao.Evento informando o evento criado no passo anterior.<br><br>
-                                            - Destinatário da transferência será 'C6 Consignado', que deverá estar devidamente cadastrado para realizar a operação.</p>
-                                </p>"><div class="content">Portabilidade de Saída/Transferência de Custódia</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node clickable" data-title="Aditamento de Papéis" 
-                                data-business-context="<p>Esta é a etapa central, onde as regras de negócio dos ativos financeiros são efetivamente alteradas para as novas condições.</p>" 
-                                data-details="<p>Execução do script principal que lê os dados da planilha 'Luz', busca os papéis correspondentes e aplica as atualizações usando a funcionalidade de Aditamento.
-                                    <br><br><b>Nome: pOpApiAditamentoPapel.insereEvento</b><br><br>
-                                    <b>Objetivo: </b><br>
-                                    Esta rotina é utilizada para incluir novos valores dos atributos aditáveis do ativo ou seja os novos valores do ativo que serão atualizados após efetivar o aditamento. <br><br>
-                                    <b>Descrição do Processo: </b><br>
-                                    A rotina de cadastro do atributo de aditamento (InsereAtributo) compreende 2 passos distintos:
-                                    . validação dos parâmetros informados; em caso de inconsistências ou ausência de valores, o processo é interrompido e uma mensagem de erro retornada em 'posMsgErro'
-                                    . Cadastra o novo valor do atributo de papel no envento de aditamento, para visualizar acessar a tela de aditamento do papel.
-                                    Qualquer erro ocorrido no processo provocará a interrupção do mesmo e retorno com mensagem explicativa no parâmetro posMsgErro.
-                                    <br><br>Para efetivação do aditamento deve executar a AlteraSituacaoEvento informando a situação 'A', ou seja, deverá chamar o processo pOpApiAditamentoPapel.alteraSituacaoEvento após atribuição.
-                                    <p><br><b>Sequencia de teste possui os seguintes passos:</b></p>
-                                    - cria a alteração de aditamento<br>
-                                    - aprovação de evento na movimentação do dia<br>
-                                    - altera a situação de aditamento - aberta<br>
-                                    - deve ser refletido no cadastro do papel.
-                                </p>"><div class="content">Aditamento de Papéis</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-64 clickable" data-title="Geração de 'Logs'" 
-                                data-business-context="<p>Para garantir a rastreabilidade e facilitar a auditoria, todas as alterações feitas pelo script são registradas.</p>" 
-                                data-details="<p>Em todas as etapas dos processos, deverá ser crados tabelas auxiliares de controle de execução de cada etapa, sendo gravados horários e dados de cada processo.<br>
-                                    Poderá posteriormente gerar um arquivo de log detalhado, registrando o 'antes' e o 'depois' de cada campo alterado para cada ativo. Ou simplesmente garantir esse controle em tabelas consultáveis para administração dos dados.</p>">Gerar Logs Detalhados</div>
-                            <div class="connector"></div>
-                            <div class="flow-node clickable" data-title="Portabilidade de Entrada" 
-                                data-business-context="<p>Com os papéis já atualizados, criamos os novos boletos que refletem as condições corretas que foram vendidas ao cliente.</p>" 
-                                data-details="<p>Esta etapa é a chamada do procedimento realizado na fase 1: Adequar Layout de Importação '707'.<br>
-                                <b>Ação realizada pelo próprio C6.</b></p>"><div class="content">Portabilidade de Entrada</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-64 clickable" data-title="Criação de Novos Boletos" 
-                                data-business-context="<p>O resultado final desta fase é que o cliente agora visualiza em sua posição os novos boletos, com as taxas e condições corretas.</p>" 
-                                data-details="<p>Novos registros são inseridos na tabela de boletos, associados aos papéis que foram aditados.</p>">Criação de novos boletos</div>
-                        </div>
+            
+            <!-- FASE 3 COM NOVO LAYOUT -->
+            <div id="phase3" class="phase-box">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 3: EXECUÇÃO</h3>
+                <div class="flex flex-col md:flex-row justify-center items-start md:gap-x-32 relative">
+                    <!-- Coluna 1 -->
+                    <div class="flex flex-col items-center">
+                        <div class="flow-node node-diamond clickable" data-title="Importar Planilhas da 'Luz'" 
+                            data-business-context="<p>Os dados corretos e atualizados, fornecidos pela equipe de negócio, são carregados no sistema. Esta passa a ser a 'fonte da verdade' para a migração.
+                                <br><br>Buscar na base Matera, todos papéis em que o indexador é “PU_EXTERNO“, custódia “CTP21“ e vencimento maior que a data de referência do sistema. Utilizar o campo Código do Ativo igual ao campo codigo_sna das Planilhas da Luz, para realizar as alterações conforme mapeamentos De -> Para.
+                            </p>" 
+                            data-details="<p>Processo de ETL que carrega as planilhas (CSV) para tabelas de staging no banco de dados para serem consumidas pelos scripts subsequentes.</p>"><div class="content">Importar Planilhas da "Luz"</div></div>
+                        <div class="connector"></div>
+                        <div class="flow-node clickable" data-title="Portabilidade de Saída/Transferência de Custódia" 
+                            data-business-context="<p>Os boletos antigos, com as condições de remuneração desatualizadas, são 'desligados' para dar lugar aos novos.<br>
+                                <br>Deve ser disponibilizado um script que efetue a Portabilidade de Saída dos boletos associados aos papéis que serão aditados, conforme critérios abaixo:<br><br>
+                                - Boletos retornados pela consulta conforme o item script de retrato;<br>
+                                - O script deverá vincular aos boletos um evento do tipo “TRANSFERENCIA DE CUSTODIA”;<br>
+                                - O evento de Transferência deverá ser aprovado automaticamente independente da configuração do sistema para este tipo de evento.<br>
+                                - A quantidade a transferir, deve ser a quantidade total vigente no boleto;<br>
+                                - O Destinatário da Transferência será “C6 Consignado”, deverá estar cadastrado devidamente para realizar a operação.<br><br>
+                                <b>Informativo:</b><br>
+                                A Transferência de Custódia é realizada através do menu (Botão Direito do Mouse → Posição do Cliente → Botão Transf. Cust):
+                            </p>" 
+                            data-details="<p>Um script busca os boletos a serem portabilizados (todos os boletos associados aos papeis ADITADOS) e realizar a transferencia de custódia.
+                                        <br><br><b>O script deve:</b><br><br>
+                                        - Vincular os boletos a um evento de 'Transferência de Custódia'. Para isso via tela é chamado a procedure sOpInsereEventoTRT informando os dados de custódia atual e novo. Pode ser usado o mesmo princípio.<br><br>
+                                        - Aprovar automaticamente o evento, independente da configuração do sistema. Realizar a chamada da função de aprovação de evento da pOpAprovacao.Evento informando o evento criado no passo anterior.<br><br>
+                                        - Destinatário da transferência será 'C6 Consignado', que deverá estar devidamente cadastrado para realizar a operação.</p>
+                            </p>"><div class="content">Portabilidade de Saída/Transferência de Custódia</div></div>
+                        <div class="connector"></div>
+                        <div class="flow-node clickable" data-title="Aditamento de Papéis" 
+                            data-business-context="<p>Esta é a etapa central, onde as regras de negócio dos ativos financeiros são efetivamente alteradas para as novas condições.</p>" 
+                            data-details="<p>Execução do script principal que lê os dados da planilha 'Luz', busca os papéis correspondentes e aplica as atualizações usando a funcionalidade de Aditamento.
+                                <br><br><b>Nome: pOpApiAditamentoPapel.insereEvento</b><br><br>
+                                <b>Objetivo: </b><br>
+                                Esta rotina é utilizada para incluir novos valores dos atributos aditáveis do ativo ou seja os novos valores do ativo que serão atualizados após efetivar o aditamento. <br><br>
+                                <b>Descrição do Processo: </b><br>
+                                A rotina de cadastro do atributo de aditamento (InsereAtributo) compreende 2 passos distintos:
+                                . validação dos parâmetros informados; em caso de inconsistências ou ausência de valores, o processo é interrompido e uma mensagem de erro retornada em 'posMsgErro'
+                                . Cadastra o novo valor do atributo de papel no envento de aditamento, para visualizar acessar a tela de aditamento do papel.
+                                Qualquer erro ocorrido no processo provocará a interrupção do mesmo e retorno com mensagem explicativa no parâmetro posMsgErro.
+                                <br><br>Para efetivação do aditamento deve executar a AlteraSituacaoEvento informando a situação 'A', ou seja, deverá chamar o processo pOpApiAditamentoPapel.alteraSituacaoEvento após atribuição.
+                                <p><br><b>Sequencia de teste possui os seguintes passos:</b></p>
+                                - cria a alteração de aditamento<br>
+                                - aprovação de evento na movimentação do dia<br>
+                                - altera a situação de aditamento - aberta<br>
+                                - deve ser refletido no cadastro do papel.
+                            </p>"><div class="content">Aditamento de Papéis</div></div>
                     </div>
-                </div>
 
-                <div id="col-2-wrapper">
-                    <div id="phase4" class="phase-box h-full">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 4: VALIDAÇÃO FINAL</h3>
-                        <div class="flex flex-col items-center">
-                            <div class="flow-node node-diamond clickable" data-title="Conferência da Valorização" 
-                                data-business-context="<p>É a prova de que o sistema está calculando a rentabilidade dos ativos corretamente de acordo com as novas regras.</p>" 
-                                data-details="<p>Após a 'virada de dia', a equipe de validação consulta as telas de estoque e confere se os valores de PU Curva e PU Contábil batem com cálculos de referência.</p>"><div class="content">Conferência da Valorização</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-64 clickable" data-title="Aguardar 'Virada de Dia'" 
-                                data-business-context="<p>Os cálculos de rentabilidade e valorização dos ativos são processos pesados, geralmente executados durante a noite.</p>" 
-                                data-details="<p>É preciso esperar a conclusão do processamento batch noturno para que os novos dados sejam refletidos nos cálculos de PU.</p>">Aguardar 'virada de dia'</div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-64 clickable" data-title="Validação dos Cálculos" 
-                                data-business-context="<p>A equipe confere manualmente ou com scripts de apoio se os valores apresentados pelo sistema estão corretos.</p>" 
-                                data-details="<p>Consultas SQL ou verificação em telas específicas para comparar o PU (Preço Unitário) calculado pelo sistema com um valor de referência.</p>">Consultar Estoque e validar PU</div>
-                            <div class="connector"></div>
-                            <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato Final'" 
-                                data-business-context="<p>Tiramos uma segunda 'foto' dos dados, agora no estado final após todas as alterações, para comparar com a 'foto' inicial.</p>" 
-                                data-details="<p>Os mesmos scripts da Fase 1 são reexecutados para gerar um novo conjunto de arquivos CSV que representam o estado final da base.</p>"><div class="content">Scripts de "Retrato Final"</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-64 clickable" data-title="Reexecução dos Scripts" 
-                                data-business-context="<p>A automação da captura do estado final garante que a comparação com o estado inicial seja precisa e consistente.</p>" 
-                                data-details="<p>Os scripts de `SELECT` da Fase 1 são executados novamente, com os mesmos filtros, para gerar os CSVs do estado final.</p>">Reexecutar scripts de retrato</div>
-                            <div class="connector"></div>
-                            <div class="flow-node node-diamond clickable" data-title="Comparativo de Validação" 
-                                data-business-context="<p>Esta é a validação final e mais importante, onde garantimos que a 'cirurgia' nos dados foi um sucesso e sem efeitos colaterais.</p>" 
-                                data-details="<p>Ferramentas de 'diff' (como `git diff` ou `WinMerge`) ou scripts Python/Shell são usados para comparar os CSVs do Retrato Inicial com os do Retrato Final. O objetivo é garantir que apenas as alterações esperadas ocorreram.</p>"><div class="content">Comparar "Inicial" vs "Final"</div></div>
-                            <div class="connector"></div>
-                            <div class="flow-node w-56 clickable" data-title="Fim do Processo" 
-                                data-business-context="<p>O projeto é formalmente encerrado, com a migração validada e concluída com sucesso.</p>" 
-                                data-details="<p>A documentação final é arquivada, o código é movido para o controle de versão final e as equipes são comunicadas do encerramento.</p>">Fim do Processo</div>
-                        </div>
+                    <!-- Coluna 2 -->
+                    <div class="flex flex-col items-center">
+                        <div class="flow-node w-64 clickable" data-title="Geração de 'Logs'" 
+                            data-business-context="<p>Para garantir a rastreabilidade e facilitar a auditoria, todas as alterações feitas pelo script são registradas.</p>" 
+                            data-details="<p>Em todas as etapas dos processos, deverá ser crados tabelas auxiliares de controle de execução de cada etapa, sendo gravados horários e dados de cada processo.<br>
+                                Poderá posteriormente gerar um arquivo de log detalhado, registrando o 'antes' e o 'depois' de cada campo alterado para cada ativo. Ou simplesmente garantir esse controle em tabelas consultáveis para administração dos dados.</p>">Gerar Logs Detalhados</div>
+                        <div class="connector"></div>
+                        <div class="flow-node clickable" data-title="Portabilidade de Entrada" 
+                            data-business-context="<p>Com os papéis já atualizados, criamos os novos boletos que refletem as condições corretas que foram vendidas ao cliente.</p>" 
+                            data-details="<p>Esta etapa é a chamada do procedimento realizado na fase 1: Adequar Layout de Importação '707'.<br>
+                            <b>Ação realizada pelo próprio C6.</b></p>"><div class="content">Portabilidade de Entrada</div></div>
+                        <div class="connector"></div>
+                        <div class="flow-node w-64 clickable" data-title="Conferência da criação de Novos Boletos" 
+                            data-business-context="<p>O resultado final desta fase é que o cliente agora visualiza em sua posição os novos boletos, com as taxas e condições corretas.</p>" >Criação de novos boletos</div>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -549,9 +510,7 @@
                 let panelOpened = false;
 
                 if (businessDetails) {
-                    // businessPanelTitle.innerText = nodeTitle; // Removido para manter o título estático
                     businessPanelContent.innerHTML = `<h3 class="text-md font-bold mb-4 text-gray-800">${nodeTitle}</h3>` + businessDetails;
-
                     if (refLink) {
                         businessRefLinkElement.href = refLink;
                         businessPanelFooter.classList.remove('hidden');
@@ -563,7 +522,6 @@
                 }
 
                 if (technicalDetails) {
-                    // technicalPanelTitle.innerText = nodeTitle; // Removido para manter o título estático
                     technicalPanelContent.innerHTML = `<h3 class="text-md font-bold mb-4 text-gray-800">${nodeTitle}</h3>` + technicalDetails;
                     technicalPanel.classList.add('active');
                     panelOpened = true;
