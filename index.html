@@ -186,8 +186,11 @@
                                 <div class="connector"></div>
                                 <div class="flow-node w-56 clickable" data-title="Exportação de Divergências" 
                                     data-business-context="<p>As divergências encontradas são consolidadas em um relatório para que a equipe de negócio possa analisar e tomar decisões.</p>" 
-                                    data-details="<p>O resultado do script é exportado para um arquivo CSV para fácil manipulação e análise em planilhas.
-                                        <br><br><b>OU</b><br><br> será exportado para uma tabela de staging no banco de dados, onde será possível quem tem acesso as consultas realizar a exportação via CSV.</p>
+                                    data-details="<p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                        Quando é colocado no script os comandos:<br>
+                                        show user<br>
+                                        <b>SET COLSEP “;”</b><br><br>
+                                        É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                     </p>">Exportar Divergências</div>
                                 <div class="connector"></div>
                                 <div class="flow-node clickable" data-title="Análise de Divergências" 
@@ -226,18 +229,23 @@
                                             - Classificação Interna do Titulo = “CRI“, ”CRA”, ”Debêntures”
                                         </p>" 
                                         data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.1.-Retrato-caracter%C3%ADsticas-do-papel"
-                                        data-details="<p><br>
-                                            op.tit.COD_CLASSIF_TIT_INTERNA
-                                            op_papel.cod_papel_sis_custodia
-                                            op_papel.DT_EMISSAO
-                                            decode(op_papel.ind_vcto_indeterminado, 'N', op_papel.dt_vcto, to_date(null)) dt_vcto,
-                                            op_papel.DT_BASE
-                                            op_papel.Coupom
-                                            op_papel.ID_TIPO_INDEXADOR
-                                            op_papel.pct_indexador
-                                            op_papel.ID_FORMULA
-                                            op_papel.cod_isin
-                                            op_papel.ind_pu_curva_externo.
+                                        data-details="<p>
+                                            op.tit.COD_CLASSIF_TIT_INTERNA<br>
+                                            op_papel.cod_papel_sis_custodia<br>
+                                            op_papel.DT_EMISSAO<br>
+                                            decode(op_papel.ind_vcto_indeterminado, 'N', op_papel.dt_vcto, to_date(null)) dt_vcto,<br>
+                                            op_papel.DT_BASE<br>
+                                            op_papel.Coupom<br>
+                                            op_papel.ID_TIPO_INDEXADOR<br>
+                                            op_papel.pct_indexador<br>
+                                            op_papel.ID_FORMULA<br>
+                                            op_papel.cod_isin<br>
+                                            op_papel.ind_pu_curva_externo.<br><br>
+                                            <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                Quando é colocado no script os comandos:<br>
+                                                show user<br>
+                                                <b>SET COLSEP “;”</b><br><br>
+                                                É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                         </p>">Retrato: Características do Papel</div>
                                         <div class="flow-node clickable w-56" data-title="Retrato: Parâmetros Juros/Amort." 
                                             data-business-context="<p>Fotografa as regras de pagamento de juros e amortização do principal do papel.<br><br>
@@ -278,7 +286,12 @@
                                                 op_papel.dt_ini_fluxo_juros;<br>
                                                 op_papel.id_tipo_amortizacao;<br>
                                                 op_papel.frequencia_amortizacao;<br>
-                                                op_papel.dt_ini_fluxo_amortizacao;<br>
+                                                op_papel.dt_ini_fluxo_amortizacao;<br><br>
+                                                <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                    Quando é colocado no script os comandos:<br>
+                                                    show user<br>
+                                                    <b>SET COLSEP “;”</b><br><br>
+                                                    É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                             </p>">Retrato: Parâmetros Juros/Amort.</div>
                                         <div class="flow-node clickable w-56" data-title="Retrato: Fluxos de Juros" 
                                             data-business-context="<p>Gera um registro de todas as parcelas de juros futuras e passadas (não pagas) do papel. <br><br>
@@ -300,7 +313,12 @@
                                                 op_fluxo_pgto_juros.pu_juros,<br>
                                                 op_fluxo_pgto_juros.prazo,<br>
                                                 op_fluxo_pgto_juros.ind_parcela_vencida_nao_paga,<br>
-                                                op_fluxo_pgto_juros.id_sit_parcela
+                                                op_fluxo_pgto_juros.id_sit_parcela<br><br>
+                                                <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                    Quando é colocado no script os comandos:<br>
+                                                    show user<br>
+                                                    <b>SET COLSEP “;”</b><br><br>
+                                                    É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                             </p>">Retrato: Fluxos de Juros</div>
                                         <div class="flow-node clickable w-56" data-title="Retrato: Fluxos de Amortização" 
                                             data-business-context="<p>Gera um registro de todas as parcelas de amortização do principal, tanto futuras quanto vencidas.
@@ -314,7 +332,12 @@
                                                 % Juros;<br>
                                                 Parcela vencida e não paga?;<br>
                                                 PU Amortização;<br>
-                                                Situação.
+                                                Situação.<br><br>
+                                                <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                    Quando é colocado no script os comandos:<br>
+                                                    show user<br>
+                                                    <b>SET COLSEP “;”</b><br><br>
+                                                    É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                             </p>" 
                                             data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.4.-Retrato-fluxos-de-amortiza%C3%A7%C3%A3o-do-papel"
                                             data-details="<p>
@@ -327,7 +350,12 @@
                                                 fpa.pct_amortizacao_juros,<br>
                                                 fpa.pu_amortizacao,<br>
                                                 fpa.ind_parcela_vencida_nao_paga,<br>
-                                                fpa.id_sit_parcela id_sit_parcela_fluxo_pgto
+                                                fpa.id_sit_parcela id_sit_parcela_fluxo_pgto<br><br>
+                                                <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                    Quando é colocado no script os comandos:<br>
+                                                    show user<br>
+                                                    <b>SET COLSEP “;”</b><br><br>
+                                                    É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                             </p>">Retrato: Fluxos de Amortização</div>
                                         <div class="flow-node clickable w-56" data-title="Retrato: Boletos Associados" 
                                             data-business-context="<p>Captura todos os boletos em aberto associados ao papel, que representam operações de venda ou transferência.
@@ -357,7 +385,7 @@
                                             </p>" 
                                             data-reference-link="https://matera.atlassian.net/wiki/spaces/RTCS/pages/359007071/DV+-+F584623+-+Open+-Ajuste+base+CRI+CRA+e+Deb+ntures#8.2.5.-Retrato-boletos-associados-ao-papel"
                                             data-details="<p><b>Consulta às tabelas de boletos e operações para retornar informações de boletos com situação 'ABERTA'.</b><br><br>
-                                                VOP_BOLETO (view base da tela)<br><br>
+                                                VOP_BOLETO e VOP_LASTRO(views base da tela)<br><br>
                                                 op_oper.id_oper<br>
                                                 op_oper.id_papel_emissao<br>
                                                 op_papel.cod_papel_sis_custodia<br>
@@ -370,12 +398,17 @@
                                                 op_oper.pct_indexador<br>
                                                 op_oper.taxa<br>
                                                 op_oper.id_formula<br>
-                                                op_lastro.qtd??<br>
+                                                op_lastro.qtd<br>
                                                 op_oper.Curva_Papel<br>
-                                                curva operação???<br>
+                                                op_oper.ind_curva_operacao<br>
                                                 op_lastro.vlr<br>
                                                 op_lastro.pu<br>
-                                                pu inicial???
+                                                op_lastro.pu_dc<br><br>
+                                                <p>Será exportado no próprio script de consulta os resultados, pode ser utilizado tabelas auxiliares de staging no banco de dados. <br><br>
+                                                    Quando é colocado no script os comandos:<br>
+                                                    show user<br>
+                                                    <b>SET COLSEP “;”</b><br><br>
+                                                    É gerado um arquivo no formato .txt  em um formato de exportação com leitura CSV.</p>
                                             </p>">Retrato: Boletos Associados</div>
                                     </div>
                                 </div>
