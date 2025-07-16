@@ -131,7 +131,7 @@
                             Adequar Layout de Importação "707"
                         </div>
                         <div class="flow-node w-64 clickable" 
-                             data-title="Alterações na Tela de Aditamento"
+                             data-title="Alterações de Aditamento"
                              data-business-context="<p>O processo de aditamento de um papel (alteração de suas características) precisa ser flexível. A inclusão do campo de 'defasagem' na tela permite que o usuário de negócio decida, caso a caso, como o cálculo da rentabilidade deve se comportar em relação ao indexador, trazendo mais precisão para a operação.
                                 <br><br>
                                 <b>Incluir o campo Defasagem Index no Aditamento</b><br><br>
@@ -208,7 +208,7 @@
                             </div>
                             <div class="flex flex-col items-center">
                                 <br>
-                                <div class="flow-node node-diamond clickable" data-title="Scripts de 'Retrato" 
+                                <div class="flow-node node-diamond clickable" data-title="Scripts de Retrato" 
                                 data-business-context="<p>Deverão ser criados scripts responsáveis por gerar um “retrato” das informações da base antes e depois das alterações dos scripts. </p>" 
                                 ><div class="content">Scripts de "Retrato"</div></div>
                                 <div class="connector"></div>
@@ -422,11 +422,9 @@
 
             <div class="phase-connector"></div>
             
-            <!-- FASE 3 COM NOVO LAYOUT -->
             <div id="phase3" class="phase-box">
                 <h3 class="text-xl font-semibold text-gray-800 mb-6">FASE 3: EXECUÇÃO</h3>
                 <div class="flex flex-col md:flex-row justify-center items-start md:gap-x-32 relative">
-                    <!-- Coluna 1 -->
                     <div class="flex flex-col items-center">
                         <div class="flow-node node-diamond clickable" data-title="Importar Planilhas da 'Luz'" 
                             data-business-context="<p>Os dados corretos e atualizados, fornecidos pela equipe de negócio, são carregados no sistema. Esta passa a ser a 'fonte da verdade' para a migração.
@@ -453,7 +451,7 @@
                             </p>" 
                             data-details="<p>Um script busca os boletos a serem portabilizados (todos os boletos associados aos papeis ADITADOS) e realizar a transferencia de custódia.
                                         <br><br><b>O script deve:</b><br><br>
-                                        - Vincular os boletos a um evento de 'Transferência de Custódia'. Para isso via tela é chamado a procedure sOpInsereEventoTransferencia informando os dados de custódia atual e novo. Pode ser usado o mesmo princípio.<br><br>
+                                        - Vincular os boletos a um evento de 'Transferência de Custódia'. Para isso chamar a procedure sOpInsereEventoTransferencia informando os dados de custódia atual e novo.<br><br>
                                         - Aprovar automaticamente o evento, independente da configuração do sistema. Realizar a chamada da função de aprovação de evento da pOpAprovacao.Evento informando o evento criado no passo anterior.<br><br>
                                         - Destinatário da transferência será 'C6 Consignado', que deverá estar devidamente cadastrado para realizar a operação.</p>
                             </p>"><div class="content">Portabilidade de Saída/Transferência de Custódia</div></div>
@@ -483,7 +481,6 @@
                             </p>"><div class="content">Aditamento de Papéis</div></div>
                     </div>
 
-                    <!-- Coluna 2 -->
                     <div class="flex flex-col items-center">
                         <div class="flow-node w-64 clickable" data-title="Geração de 'Logs'" 
                             data-business-context="<p>Para garantir a rastreabilidade e facilitar a auditoria, todas as alterações feitas pelo script são registradas.</p>" 
@@ -505,10 +502,8 @@
         </div>
     </div>
     
-    <!-- Painel de Overlay -->
     <div id="details-panel-overlay" class="details-panel-overlay"></div>
 
-    <!-- Painel Esquerdo: Contexto de Negócio -->
     <div id="business-panel" class="side-panel">
         <div class="p-5 border-b flex justify-between items-center bg-blue-50">
             <h2 id="business-panel-title" class="text-lg font-semibold text-blue-900">Contexto de Negócio</h2>
@@ -525,7 +520,6 @@
         </div>
     </div>
     
-    <!-- Painel Direito: Solução Técnica -->
     <div id="technical-panel" class="side-panel">
         <div class="p-5 border-b flex justify-between items-center bg-purple-50">
             <h2 id="technical-panel-title" class="text-lg font-semibold text-purple-900">Solução Técnica</h2>
